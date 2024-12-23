@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Test</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #d3d3d3;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .light {
+            width: 50px;
+            height: 50px;
+            background-color: grey;
+            border-radius: 50%;
+            margin: 5px;
+        }
+        #lightsContainer {
+            display: flex;
+        }
+        #startButton, #resetButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        #reactionTime {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reaction Test</h1>
+    <div id="lightsContainer">
+        <div class="light" id="light1"></div>
+        <div class="light" id="light2"></div>
+        <div class="light" id="light3"></div>
+        <div class="light" id="light4"></div>
+        <div class="light" id="light5"></div>
+    </div>
+    <button id="startButton">Start Test</button>
+    <button id="resetButton" style="display: none;">Reset</button>
+    <div id="reactionTime"></div>
+
+    <script>
+        const lights = [
+            document.getElementById('light1'),
+            document.getElementById('light2'),
+            document.getElementById('light3'),
+            document.getElementById('light4'),
+            document.getElementById('light5')
+        ];
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const reactionTimeDisplay = document.getElementById('reactionTime');
+
+        let startTime;
+        let testStarted = false;
+        let allLightsRed = false;
+        let earlyClick = false;
+
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            resetButton.style.display = 'none';
+            reactionTimeDisplay.innerText = '';
+            earlyClick = false;
+
+            let delay = 0;
+            lights.forEach((light, index) => {
+                setTimeout(() => {
+                    light.style.backgroundColor = 'red';
+                }, delay);
+                delay += 1000;
+            });
+
+            const variableDelay = Math.random() * 3000 + 2000; // Random delay between 2-5 seconds
+
+            setTimeout(() => {
+                if (earlyClick) return;
+                lights.forEach(light => light.style.backgroundColor = 'grey');
+                allLightsRed = true;
+                startTime = performance.now();
+                testStarted = true;
+            }, delay + variableDelay);
+        });
+
+        resetButton.addEventListener('click', () => {
+            lights.forEach(light => light.style.backgroundColor = 'grey');
+            startButton.style.display = 'block';
+            resetButton.style.display = 'none';
+            reactionTimeDisplay.innerText = '';
+            testStarted = false;
+            allLightsRed = false;
+        });
+
+        const checkReactionTime = () => {
+            if (!testStarted) return;
+
+            if (!allLightsRed) {
+                reactionTimeDisplay.innerText = 'Invalid: Too early!';
+                earlyClick = true;
+                testStarted = false;
+                resetButton.style.display = 'block';
+                return;
+            }
+
+            const reactionTime = performance.now() - startTime;
+            reactionTimeDisplay.innerText = `Your reaction time is ${reactionTime.toFixed(2)} ms`;
+            testStarted = false;
+            resetButton.style.display = 'block';
+        };
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                checkReactionTime();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (event.target !== startButton && event.target !== resetButton) {
+                checkReactionTime();
+            }
+        });
+    </script>
+</body>
+</html>

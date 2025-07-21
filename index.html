@@ -1,137 +1,1142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reaction Test</title>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verto</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+<style>
         body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #d3d3d3;
+            min-height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            overflow: hidden; /* Prevent body scroll when phone frame is fixed */
         }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .light {
-            width: 50px;
-            height: 50px;
-            background-color: grey;
-            border-radius: 50%;
-            margin: 5px;
-        }
-        #lightsContainer {
+        /* Styles for the iPhone-like frame */
+        .phone-frame {
+            position: relative;
+            width: 420px; /* Fixed width for the phone frame */
+            height: 90vh; /* Fixed height for the phone frame */
+            background-color: #1a1a1a; /* Dark phone body */
+            border-radius: 3rem; /* Very rounded corners for the phone itself */
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), /* Deeper shadow */
+                        0 0 0 10px #333; /* Inner border/bezel effect */
             display: flex;
+            flex-direction: column; /* To stack notch and app-container */
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Hide anything outside the frame */
+            padding: 10px; /* Padding for the bezel effect */
+            box-sizing: border-box; /* Include padding in width/height */
         }
-        #startButton, #resetButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 20px;
+
+        .notch {
+            position: absolute;
+            top: 10px; /* Position relative to the top of the phone-frame */
+            width: 120px; /* Width of the notch */
+            height: 25px; /* Height of the notch */
+            background-color: #1a1a1a; /* Same as phone body */
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            z-index: 10; /* Ensure it's above the app content */
+        }
+
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 2rem; /* Rounded corners for the actual screen content */
+            box-shadow: none; /* Remove inner shadow as frame has it */
+            width: 100%; /* Occupy full width of phone-frame minus padding */
+            height: 100%; /* Occupy full height of phone-frame minus padding */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative; /* For content positioning */
+        }
+        .header {
+            background: linear-gradient(to right, #4CAF50, #8BC34A); /* Green gradient */
+            color: white;
+            padding: 1.5rem;
+            border-top-left-radius: 2rem; /* Match app-container radius */
+            border-top-right-radius: 2rem; /* Match app-container radius */
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative; /* For z-index of banner */
+            z-index: 20; /* Ensure header is above content but below banner */
+        }
+        .content {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto; /* Scrollable content */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            padding: 0.75rem 0;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+            border-bottom-left-radius: 2rem; /* Match app-container radius */
+            border-bottom-right-radius: 2rem; /* Match app-container radius */
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #757575;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+        }
+        .nav-item.active {
+            color: #4CAF50;
+            background-color: #e8f5e9; /* Light green background for active */
+        }
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #424242;
+            padding: 0.8rem 1.5rem;
+            border-radius: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+            transform: translateY(-1px);
+        }
+        .message-box {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 500;
+            display: none; /* Hidden by default */
+        }
+        .progress-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(#4CAF50 0% 0%, #e0e0e0 0% 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .progress-circle span {
+            color: white; /* Changed to white for better contrast */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Added shadow for readability */
+        }
+        
+        .progress-circle.points::before { /* New class for points ring */
+            border-color: #4CAF50 #4CAF50 #e0e0e0 #e0e0e0;
+        }
+        
+        /* City Selector Styles */
+        .city-selector-container {
+            margin-bottom: 1rem;
+        }
+        .city-selector-container label {
+            font-weight: 600;
+            color: #424242;
+            margin-right: 0.5rem;
+        }
+        .city-selector-container select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* Banner Ad Styles */
+        .banner-ad {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffeb3b; /* Yellow background */
+            color: #333;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100; /* Ensure it's on top of everything */
+            border-top-left-radius: 2rem;
+            border-top-right-radius: 2rem;
+        }
+        .banner-ad .close-btn {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.2rem;
+            line-height: 1;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .banner-ad .close-btn:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        /* Medal specific styles */
+        .medal-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+            position: relative; /* For checkmark positioning */
+            opacity: 0.6; /* Default unachieved state */
+            filter: grayscale(100%); /* Default unachieved state */
+        }
+        .medal-item.achieved {
+            opacity: 1;
+            filter: grayscale(0%);
+            border: 2px solid #4CAF50; /* Green border for achieved */
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3); /* Green glow */
+        }
+        .medal-item:hover {
+            transform: translateY(-5px);
+        }
+        .medal-item i {
+            font-size: 3rem; /* Larger icons */
+            margin-bottom: 0.5rem;
+        }
+        .medal-checkmark {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            color: #4CAF50;
+            font-size: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+        .medal-item.achieved .medal-checkmark {
+            display: block; /* Show when achieved */
+        }
+        .co2-time-filter button {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px; /* Full rounded */
+            background-color: #e0e0e0;
+            color: #424242;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .co2-time-filter button.active {
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* New Settings Modal Styles */
+        .settings-modal {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            z-index: 200;
+            flex-direction: column;
+            border-radius: 2rem;
+        }
+        .settings-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            color: white;
+            border-top-left-radius: 2rem;
+            border-top-right-radius: 2rem;
+        }
+        .settings-modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .settings-modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
             cursor: pointer;
         }
-        #reactionTime {
-            margin-top: 20px;
-            font-size: 18px;
+        .settings-modal-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #424242;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+        }
+         .form-group input:disabled {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .phone-frame {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                padding: 0;
+            }
+            .notch {
+                top: 0;
+                border-radius: 0 0 1rem 1rem;
+            }
+            .app-container {
+                border-radius: 0;
+            }
+            .header {
+                border-radius: 0;
+            }
+            .nav-bar {
+                border-radius: 0;
+            }
+            .banner-ad {
+                border-radius: 0;
+            }
+            .settings-modal {
+                border-radius: 0;
+            }
+            .settings-modal-header {
+                border-radius: 0;
+            }
         }
     </style>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-    <h1>Reaction Test</h1>
-    <div id="lightsContainer">
-        <div class="light" id="light1"></div>
-        <div class="light" id="light2"></div>
-        <div class="light" id="light3"></div>
-        <div class="light" id="light4"></div>
-        <div class="light" id="light5"></div>
+<div class="phone-frame">
+<div class="notch"></div>
+<div class="app-container">
+<div class="banner-ad" id="banner-ad">
+<image src="https://img.icons8.com/?size=100&amp;id=59997&amp;format=png&amp;color=000000" style="height: 30px; width: 30px"/><span>Sobeys: Eat Fresh, Live Better!</span><a href="https://www.sobeys.com" style="color: green" target="_blank">Learn More</a>
+<button class="close-btn" onclick="closeBannerAd()">×</button>
+</div>
+<div class="header">
+<h1 class="text-3xl font-bold mb-1">Verto</h1>
+<p class="text-sm">"Better Moves. Better Planet."</p>
+</div>
+<div class="content">
+<div class="section active" id="dashboard-section">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard</h2>
+<div class="card flex justify-between items-center">
+<div>
+<p class="text-gray-600 text-lg">Your Points</p>
+<p class="text-5xl font-extrabold text-green-600 mt-2" id="current-points">0</p>
+</div>
+<img alt="Leaf Icon" class="rounded-full" src="https://img.icons8.com/?size=100&amp;id=18066&amp;format=png&amp;color=000000"/>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Daily Rings</h3>
+<div class="flex justify-around items-center">
+<div class="flex flex-col items-center">
+<div class="progress-circle points">
+<span id="daily-points-ring-progress">0%</span>
+</div>
+<p class="text-sm text-gray-600 mt-2">Points Ring</p>
+</div>
+</div>
+<p class="text-sm text-gray-500 mt-4 text-center">Complete your rings by tracking sustainable trips!</p>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
+<div class="grid grid-cols-2 gap-4">
+<button class="btn-primary" onclick="showSection('tracking-section')">
+<i class="fas fa-route mr-2"></i>Track Trip
+                            </button>
+<button class="btn-secondary" onclick="showSection('engage-section')">
+<i class="fas fa-star mr-2"></i>Engage
+                            </button>
+</div>
+</div>
+</div>
+<div class="section" id="tracking-section">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Transport Tracking</h2>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">E-Bikes</h3>
+<p class="text-gray-600 mb-4">Unlock an e-bike through a partner app, and Verto will automatically track your ride.</p>
+<button class="btn-primary w-full mb-3" onclick="startTracking('ebike')">
+<i class="fas fa-bicycle mr-2"></i>Unlock &amp; Track E-Bike
+                        </button>
+<div class="message-box" id="ebike-message"></div>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">E-Scooters</h3>
+<p class="text-gray-600 mb-4">Unlock an e-scooter through a partner app, and Verto will automatically track your ride.</p>
+<button class="btn-primary w-full mb-3" onclick="startTracking('escooter')">
+<i class="fas fa-scooter mr-2"></i>Unlock &amp; Track E-Scooter
+                        </button>
+<div class="message-box" id="escooter-message"></div>
+</div>
+</div>
+<div class="section" id="engage-section">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Engage</h2>
+<div class="card text-center">
+<p class="text-gray-600 text-lg">CO₂ Saved</p>
+<p class="text-5xl font-extrabold text-green-600 mt-2" id="engage-carbon-saved">0 kg</p>
+<div class="flex justify-center space-x-2 mt-4 co2-time-filter">
+<button class="active" id="co2-day-btn" onclick="setCO2View('day')">Day</button>
+<button id="co2-week-btn" onclick="setCO2View('week')">Week</button>
+<button id="co2-month-btn" onclick="setCO2View('month')">Month</button>
+<button id="co2-all-btn" onclick="setCO2View('all')">All</button>
+</div>
+</div>
+<div class="card text-center">
+<p class="text-gray-600 text-lg">Your Current Points</p>
+<p class="text-5xl font-extrabold text-green-600 mt-2" id="engage-current-points">0</p>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Your Medals</h3>
+<div class="grid grid-cols-2 gap-4 text-center" id="medals-grid">
+</div>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Leaderboard</h3>
+<p class="text-gray-600 mb-4">Rankings based on carbon saved and trips taken in your area.</p>
+<ul class="space-y-3" id="leaderboard-list">
+</ul>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Redeem Options</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm">
+<div>
+<p class="font-semibold text-gray-800">Transit Discount ($5)</p>
+<p class="text-sm text-gray-500">Cost: 200 points</p>
+</div>
+<button class="btn-primary text-sm px-4 py-2" onclick="redeemReward(200, 'Transit Discount')">Redeem</button>
+</div>
+<div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm">
+<div>
+<p class="font-semibold text-gray-800">Tim Hortons Gift Card ($10)</p>
+<p class="text-sm text-gray-500">Cost: 400 points</p>
+</div>
+<button class="btn-primary text-sm px-4 py-2" onclick="redeemReward(400, 'Local Cafe Voucher')">Redeem</button>
+</div>
+<div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm">
+<div>
+<p class="font-semibold text-gray-800">Transit Discount ($15)</p>
+<p class="text-sm text-gray-500">Cost: 500 points</p>
+</div>
+<button class="btn-primary text-sm px-4 py-2" onclick="redeemReward(500, 'Bike Share Credit')">Redeem</button>
+</div>
+</div>
+<div class="message-box" id="redeem-message"></div>
+</div>
+</div>
+<div class="section" id="map-section">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Live Map</h2>
+<div class="card">
+<div class="city-selector-container">
+<label for="city-selector">Select a City:</label>
+<select class="w-full p-2 border rounded-md" id="city-selector">
+<option selected value="Winnipeg">Winnipeg</option>
+<option value="Toronto">Toronto</option>
+<option value="Montreal">Montreal</option>
+<option value="Calgary">Calgary</option>
+<option value="Vancouver">Vancouver</option>
+</select>
+</div>
+<div id="map" style="height: 300px; border-radius: 1rem; margin-top: 1rem;"></div>
+</div>
+</div>
+<div class="section" id="settings-section">
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Settings</h2>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">About Transport Modes</h3>
+<div class="space-y-4">
+<div>
+<h4 class="font-semibold text-lg text-gray-800 mb-2">E-Bikes &amp; E-Scooters</h4>
+<p class="text-gray-600 mb-2">
+                                    We integrate with third-party rental companies to track your e-bike and e-scooter usage. Simply unlock a vehicle through a partner app, and Verto will record your sustainable journey.
+                                </p>
+<p class="text-gray-600">
+                                    **Safety Tip:** Always wear a helmet. Follow local traffic laws, use designated bike lanes when available, and be mindful of pedestrians. Inspect the vehicle before riding.
+                                </p>
+</div>
+</div>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Card Management</h3>
+<p class="text-gray-600 mb-3">Manage your NFC-enabled payment cards for seamless rental payments. Link with popular payment apps for even easier transactions.</p>
+<button class="btn-primary w-full mb-2" onclick="openSettingsModal('add-card-ui')">
+<i class="fas fa-credit-card mr-2"></i>Add New Card
+                        </button>
+<button class="btn-secondary w-full" onclick="openSettingsModal('linked-cards-ui')">
+<i class="fas fa-wallet mr-2"></i>View Linked Cards &amp; Apps
+                        </button>
+</div>
+<div class="card">
+<h3 class="text-xl font-semibold text-gray-800 mb-4">Account Settings</h3>
+<p class="text-gray-600 mb-3">View and manage your profile details, including username, email, and membership information.</p>
+<button class="btn-primary w-full" onclick="openSettingsModal('profile-ui')">
+<i class="fas fa-user-circle mr-2"></i>View Profile
+                        </button>
+</div>
+<div class="message-box" id="settings-message"></div>
+</div>
+</div>
+<div class="nav-bar">
+<div class="nav-item active" data-section="dashboard-section">
+<i class="fas fa-home"></i>
+<span>Home</span>
+</div>
+<div class="nav-item" data-section="tracking-section">
+<i class="fas fa-route"></i>
+<span>Track</span>
+</div>
+<div class="nav-item" data-section="map-section">
+<i class="fas fa-map-marked-alt"></i>
+<span>Map</span>
+</div>
+<div class="nav-item" data-section="engage-section">
+<i class="fas fa-star"></i>
+<span>Engage</span>
+</div>
+<div class="nav-item" data-section="settings-section">
+<i class="fas fa-cog"></i>
+<span>Settings</span>
+</div>
+</div>
+
+<div class="settings-modal" id="profile-ui" style="display: none; flex-direction: column;">
+    <div class="settings-modal-header">
+        <h2>Your Profile</h2>
+        <button class="settings-modal-close-btn" onclick="closeSettingsModal('profile-ui')">×</button>
     </div>
-    <button id="startButton">Start Test</button>
-    <button id="resetButton" style="display: none;">Reset</button>
-    <div id="reactionTime"></div>
+    <div class="settings-modal-content">
+        <div class="form-group">
+            <label for="profile-username">Username</label>
+            <input disabled id="profile-username" type="text" value="Nate"/>
+        </div>
+        <div class="form-group">
+            <label for="profile-email">Email</label>
+            <input disabled id="profile-email" type="email" value="nate@example.com"/>
+        </div>
+        <div class="form-group">
+            <label for="profile-plan">Membership Plan</label>
+            <input disabled id="profile-plan" type="text" value="Premium"/>
+        </div>
+        <div class="flex gap-4 mt-8">
+            <button class="btn-primary flex-1" id="edit-profile-btn" onclick="toggleProfileEdit(true)">Edit</button>
+            <button class="btn-secondary flex-1" id="save-profile-btn" onclick="toggleProfileEdit(false)" style="display: none;">Save</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const lights = [
-            document.getElementById('light1'),
-            document.getElementById('light2'),
-            document.getElementById('light3'),
-            document.getElementById('light4'),
-            document.getElementById('light5')
+<div class="settings-modal" id="add-card-ui" style="display: none; flex-direction: column;">
+    <div class="settings-modal-header">
+        <h2>Add New Card</h2>
+        <button class="settings-modal-close-btn" onclick="closeSettingsModal('add-card-ui')">×</button>
+    </div>
+    <div class="settings-modal-content">
+        <div class="form-group">
+            <label for="card-name">Cardholder Name</label>
+            <input id="card-name" placeholder="Nate Example" type="text"/>
+        </div>
+        <div class="form-group">
+            <label for="card-number">Card Number</label>
+            <input id="card-number" placeholder="•••• •••• •••• ••••" type="text"/>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+                <label for="card-expiry">Expiry Date</label>
+                <input id="card-expiry" placeholder="MM/YY" type="text"/>
+            </div>
+            <div class="form-group">
+                <label for="card-cvv">CVV</label>
+                <input id="card-cvv" placeholder="•••" type="text"/>
+            </div>
+        </div>
+        <button class="btn-primary w-full mt-8" onclick="saveNewCard()">Save Card</button>
+    </div>
+</div>
+
+<div class="settings-modal" id="linked-cards-ui" style="display: none; flex-direction: column;">
+    <div class="settings-modal-header">
+        <h2>Linked Cards & Apps</h2>
+        <button class="settings-modal-close-btn" onclick="closeSettingsModal('linked-cards-ui')">×</button>
+    </div>
+    <div class="settings-modal-content">
+        <p class="text-gray-600 mb-4">Manage your saved payment methods.</p>
+        <ul class="space-y-3" id="linked-cards-list">
+            <li class="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
+                <div class="flex items-center">
+                    <i class="fab fa-cc-visa text-2xl mr-4 text-blue-600"></i>
+                    <div>
+                        <p class="font-semibold">Visa •••• 1234</p>
+                        <p class="text-sm text-gray-500">Expires 12/26</p>
+                    </div>
+                </div>
+                <button class="text-red-500 font-semibold" onclick="this.parentElement.remove()">Remove</button>
+            </li>
+            <li class="flex items-center justify-between bg-gray-100 p-4 rounded-xl">
+                <div class="flex items-center">
+                    <i class="fab fa-apple-pay text-2xl mr-4"></i>
+                    <div>
+                        <p class="font-semibold">Apple Pay</p>
+                        <p class="text-sm text-gray-500">Linked Account</p>
+                    </div>
+                </div>
+                <button class="text-red-500 font-semibold" onclick="this.parentElement.remove()">Remove</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+</div>
+</div>
+<script>
+        // Global state variables
+        let userPoints = 0;
+        let carbonSavedToday = 0; // in kg for the current session (simulated day)
+        let carbonSavedWeek = 0; // Simulated initial data
+        let carbonSavedMonth = 0; // Simulated initial data
+        let carbonSavedAll = 0; // Simulated initial data
+        let totalTrips = 0; // To track for medal criteria
+
+        let currentCO2View = 'day'; // Default view for CO2 saved
+
+        // Daily target for Points Ring
+        const DAILY_POINTS_TARGET = 100; // points
+
+        // Simulated leaderboard data (excluding the current user initially)
+        let leaderboardData = [
+            { name: 'EcoExplorer', points: 950 },
+            { name: 'GreenRider', points: 880 },
+            { name: 'BikeMaster', points: 600 },
+            { name: 'ScooterPro', points: 550 },
+            { name: 'UrbanCyclist', points: 400 },
+            { name: 'GreenCommuter', points: 300 }
         ];
-        const startButton = document.getElementById('startButton');
-        const resetButton = document.getElementById('resetButton');
-        const reactionTimeDisplay = document.getElementById('reactionTime');
 
-        let startTime;
-        let testStarted = false;
-        let allLightsRed = false;
-        let earlyClick = false;
+        // Medal definitions
+        const medals = [
+            {
+                id: 'points-ring-achiever', // Updated ID
+                name: 'Points Ring Achiever', // Updated name
+                description: `Earn ${DAILY_POINTS_TARGET} points in a day`, // Updated description
+                icon: 'fas fa-award', // Changed icon for points
+                iconColor: 'text-green-500',
+                criteriaType: 'pointsToday', // New criteria type
+                criteriaValue: DAILY_POINTS_TARGET,
+                achieved: false
+            },
+            {
+                id: 'eco-commuter',
+                name: 'Eco Commuter',
+                description: 'Track 5 trips',
+                icon: 'fas fa-trophy',
+                iconColor: 'text-yellow-500',
+                criteriaType: 'trips',
+                criteriaValue: 5,
+                achieved: false
+            },
+            {
+                id: 'verto-veteran',
+                name: 'Verto Veteran',
+                description: 'Earn 500 points',
+                icon: 'fas fa-star',
+                iconColor: 'text-blue-500',
+                criteriaType: 'points',
+                criteriaValue: 500,
+                achieved: false
+            },
+            {
+                id: 'green-guru',
+                name: 'Green Guru',
+                description: 'Save 50kg CO₂ (All Time)',
+                icon: 'fas fa-globe',
+                iconColor: 'text-purple-500',
+                criteriaType: 'carbonAll',
+                criteriaValue: 50,
+                achieved: false
+            }
+        ];
 
-        startButton.addEventListener('click', () => {
-            startButton.style.display = 'none';
-            resetButton.style.display = 'none';
-            reactionTimeDisplay.innerText = '';
-            earlyClick = false;
 
-            let delay = 0;
-            lights.forEach((light, index) => {
-                setTimeout(() => {
-                    light.style.backgroundColor = 'red';
-                }, delay);
-                delay += 1000;
+        // Function to update UI elements
+        function updateUI() {
+            document.getElementById('current-points').textContent = userPoints;
+
+            // Update points in Engage section
+            const engageCurrentPointsElement = document.getElementById('engage-current-points');
+            if (engageCurrentPointsElement) {
+                engageCurrentPointsElement.textContent = userPoints;
+            }
+
+            // Update CO2 Saved based on currentCO2View
+            updateCO2Display();
+
+            // Update Points Ring progress
+            const rawPointsProgress = (userPoints / DAILY_POINTS_TARGET) * 100;
+            const visualPointsProgress = Math.min(rawPointsProgress, 100); // Capped at 100 for the visual ring
+
+            document.getElementById('daily-points-ring-progress').textContent = `${Math.round(rawPointsProgress)}%`; // Display the raw, uncapped percentage
+            const ring = document.querySelector('.progress-circle');
+            if (ring) {
+                ring.style.background = `conic-gradient(#4CAF50 0% ${visualPointsProgress}%, #e0e0e0 ${visualPointsProgress}% 100%)`; // Use the capped value for the visual
+            }
+
+            // Update and sort leaderboard
+            updateLeaderboard();
+
+            // Check and render medals
+            checkMedalCompletion();
+            renderMedals();
+        }
+
+        // Function to update CO2 display based on selected view
+        function updateCO2Display() {
+            const engageCarbonSavedElement = document.getElementById('engage-carbon-saved');
+            if (!engageCarbonSavedElement) return;
+
+            let displayValue = 0;
+            switch (currentCO2View) {
+                case 'day':
+                    displayValue = carbonSavedToday;
+                    break;
+                case 'week':
+                    displayValue = carbonSavedWeek;
+                    break;
+                case 'month':
+                    displayValue = carbonSavedMonth;
+                    break;
+                case 'all':
+                    displayValue = carbonSavedAll;
+                    break;
+            }
+            engageCarbonSavedElement.textContent = `${displayValue.toFixed(1)} kg`;
+
+            // Update active state of CO2 filter buttons
+            document.querySelectorAll('.co2-time-filter button').forEach(btn => {
+                if (btn.id === `co2-${currentCO2View}-btn`) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Function to set the CO2 view
+        function setCO2View(view) {
+            currentCO2View = view;
+            updateCO2Display();
+        }
+
+        // Function to update and sort the leaderboard
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboard-list');
+            if (!leaderboardList) return; // Exit if leaderboard element not found
+
+            // Create a temporary array including the current user
+            let currentLeaderboard = [...leaderboardData];
+            const currentUserIndex = currentLeaderboard.findIndex(user => user.name === 'You (Current User)');
+            if (currentUserIndex !== -1) {
+                currentLeaderboard[currentUserIndex].points = userPoints;
+            } else {
+                currentLeaderboard.push({ name: 'You (Current User)', points: userPoints });
+            }
+
+            // Sort the leaderboard by points in descending order
+            currentLeaderboard.sort((a, b) => b.points - a.points);
+
+            // Clear existing list items
+            leaderboardList.innerHTML = '';
+
+            // Render sorted leaderboard
+            currentLeaderboard.forEach((user, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex items-center justify-between p-3 bg-white rounded-xl shadow-sm';
+                listItem.innerHTML = `
+                    <span class="font-bold text-lg ${user.name === 'You (Current User)' ? 'text-green-600' : 'text-gray-700'}">#${index + 1}</span>
+                    <span class="font-medium text-gray-800">${user.name}</span>
+                    <span class="text-gray-600">${user.points} pts</span>
+                `;
+                leaderboardList.appendChild(listItem);
+            });
+        }
+
+        // Function to check and update medal completion status
+        function checkMedalCompletion() {
+            medals.forEach(medal => {
+                let isCurrentlyAchieved = false;
+                switch (medal.criteriaType) {
+                    case 'pointsToday': // New criteria type
+                        isCurrentlyAchieved = userPoints >= medal.criteriaValue; // Based on userPoints
+                        break;
+                    case 'trips':
+                        isCurrentlyAchieved = totalTrips >= medal.criteriaValue;
+                        break;
+                    case 'points':
+                        isCurrentlyAchieved = userPoints >= medal.criteriaValue;
+                        break;
+                    case 'carbonAll':
+                        isCurrentlyAchieved = carbonSavedAll >= medal.criteriaValue;
+                        break;
+                }
+                // Once achieved, keep it achieved (OR logic)
+                medal.achieved = medal.achieved || isCurrentlyAchieved;
+            });
+        }
+
+        // Function to render medals in the UI
+        function renderMedals() {
+            const medalsGrid = document.getElementById('medals-grid');
+            if (!medalsGrid) return;
+
+            medalsGrid.innerHTML = ''; // Clear existing medals
+
+            medals.forEach(medal => {
+                const medalItem = document.createElement('div');
+                medalItem.className = `medal-item ${medal.achieved ? 'achieved' : ''}`;
+                medalItem.innerHTML = `
+                    <i class="${medal.icon} ${medal.iconColor}"></i>
+                    <p class="font-semibold text-gray-700">${medal.name}</p>
+                    <p class="text-sm text-gray-500">${medal.description}</p>
+                    <i class="fas fa-check-circle medal-checkmark"></i>
+                `;
+                medalsGrid.appendChild(medalItem);
+            });
+        }
+
+
+        // Function to show messages
+        function showMessage(elementId, message, type = 'success') {
+            const messageBox = document.getElementById(elementId);
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#e8f5e9';
+                messageBox.style.color = '#2e7d32';
+            } else if (type === 'error') {
+                messageBox.style.backgroundColor = '#ffebee';
+                messageBox.style.color = '#c62828';
+            }
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // Simulate a trip after a "payment" step
+        function startTracking(type) {
+            let paymentMessage = '';
+            let messageElementId = '';
+            let tripDescription = '';
+            let pointsEarned = 0;
+            let co2Reduction = 0;
+
+            switch (type) {
+                case 'ebike':
+                    paymentMessage = 'Simulating unlock and payment for e-bike...';
+                    messageElementId = 'ebike-message';
+                    tripDescription = 'e-bike trip';
+                    pointsEarned = 5;
+                    co2Reduction = 0.3; // kg
+                    break;
+                case 'escooter':
+                    paymentMessage = 'Simulating unlock and payment for e-scooter...';
+                    messageElementId = 'escooter-message';
+                    tripDescription = 'e-scooter trip';
+                    pointsEarned = 5;
+                    co2Reduction = 0.2; // kg
+                    break;
+                default:
+                    return;
+            }
+
+            showMessage(messageElementId, paymentMessage, 'success'); // Show payment message first
+
+            // Simulate a delay for payment/unlock
+            setTimeout(() => {
+                userPoints += pointsEarned;
+                carbonSavedToday += co2Reduction;
+                carbonSavedWeek += co2Reduction; // Accumulate for week
+                carbonSavedMonth += co2Reduction; // Accumulate for month
+                carbonSavedAll += co2Reduction; // Accumulate for all time
+                totalTrips++; // Increment total trips
+
+                updateUI();
+                showMessage(messageElementId, `Payment successful! Successfully tracked your ${tripDescription}! You earned ${pointsEarned} points.`);
+            }, 1500); // 1.5 second delay for "payment"
+        }
+
+
+        // Redeem a reward
+        function redeemReward(cost, rewardName) {
+            const redeemMessageElement = 'redeem-message';
+            if (userPoints >= cost) {
+                userPoints -= cost;
+                updateUI();
+                showMessage(redeemMessageElement, `You successfully redeemed ${rewardName} for ${cost} points!`);
+            } else {
+                showMessage(redeemMessageElement, `Not enough points to redeem ${rewardName}. You need ${cost - userPoints} more points.`, 'error');
+            }
+        }
+
+        // Navigation logic
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            navItems.forEach(item => item.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('active');
+            
+            // Re-initialize map if map section is shown
+            if (sectionId === 'map-section' && map) {
+                setTimeout(() => map.invalidateSize(), 10);
+            }
+            updateUI(); // Update UI when section changes to ensure points are current
+        }
+
+        // Banner Ad close function
+        function closeBannerAd() {
+            document.getElementById('banner-ad').style.display = 'none';
+        }
+        
+        // --- New Settings Modal Logic ---
+        function openSettingsModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeSettingsModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+             // Reset profile edit state when closing
+            if (modalId === 'profile-ui') {
+                toggleProfileEdit(false, false); // force save state without message
+            }
+        }
+
+        function toggleProfileEdit(isEditing, showMsg = true) {
+            const usernameInput = document.getElementById('profile-username');
+            const emailInput = document.getElementById('profile-email');
+            const editBtn = document.getElementById('edit-profile-btn');
+            const saveBtn = document.getElementById('save-profile-btn');
+
+            usernameInput.disabled = !isEditing;
+            emailInput.disabled = !isEditing;
+
+            if (isEditing) {
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'block';
+            } else {
+                editBtn.style.display = 'block';
+                saveBtn.style.display = 'none';
+                if(showMsg) {
+                    showMessage('settings-message', 'Profile updated successfully!');
+                }
+            }
+        }
+        
+        function saveNewCard() {
+            // Basic validation
+            if (document.getElementById('card-name').value && document.getElementById('card-number').value) {
+                showMessage('settings-message', 'New card has been securely saved (simulated).');
+                // Here you would clear the form and close the modal
+                document.getElementById('card-name').value = '';
+                document.getElementById('card-number').value = '';
+                document.getElementById('card-expiry').value = '';
+                document.getElementById('card-cvv').value = '';
+                closeSettingsModal('add-card-ui');
+            } else {
+                 showMessage('settings-message', 'Please fill in all card details.', 'error');
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetSectionId = item.getAttribute('data-section');
+                    showSection(targetSectionId);
+                });
             });
 
-            const variableDelay = Math.random() * 3000 + 2000; // Random delay between 2-5 seconds
-
-            setTimeout(() => {
-                if (earlyClick) return;
-                lights.forEach(light => light.style.backgroundColor = 'grey');
-                allLightsRed = true;
-                startTime = performance.now();
-                testStarted = true;
-            }, delay + variableDelay);
-        });
-
-        resetButton.addEventListener('click', () => {
-            lights.forEach(light => light.style.backgroundColor = 'grey');
-            startButton.style.display = 'block';
-            resetButton.style.display = 'none';
-            reactionTimeDisplay.innerText = '';
-            testStarted = false;
-            allLightsRed = false;
-        });
-
-        const checkReactionTime = () => {
-            if (!testStarted) return;
-
-            if (!allLightsRed) {
-                reactionTimeDisplay.innerText = 'Invalid: Too early!';
-                earlyClick = true;
-                testStarted = false;
-                resetButton.style.display = 'block';
-                return;
-            }
-
-            const reactionTime = performance.now() - startTime;
-            reactionTimeDisplay.innerText = `Your reaction time is ${reactionTime.toFixed(2)} ms`;
-            testStarted = false;
-            resetButton.style.display = 'block';
-        };
-
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
-                checkReactionTime();
-            }
-        });
-
-        document.addEventListener('click', (event) => {
-            if (event.target !== startButton && event.target !== resetButton) {
-                checkReactionTime();
-            }
+            // Initial UI update and show dashboard
+            updateUI();
+            showSection('dashboard-section'); // Ensure dashboard is active on load
         });
     </script>
+
+<script>
+    // --- MAP LOGIC ---
+    let map;
+    let currentMarkers = [];
+    const cityData = {
+        "Winnipeg": {
+            center: [49.8954, -97.1385],
+            vehicles: [
+                { coords: [49.890, -97.134], popup: 'E-Scooter at The Forks' },
+                { coords: [49.900, -97.142], popup: 'E-Bike in Exchange District' },
+                { coords: [49.882, -97.146], popup: 'E-Bike in Osborne Village' },
+                { coords: [49.891, -97.155], popup: 'E-Scooter near U of Winnipeg' },
+                { coords: [49.898, -97.125], popup: 'E-Scooter near Shaw Park' },
+                { coords: [49.885, -97.138], popup: 'E-Scooter at Legislative Building' },
+            ]
+        },
+        "Toronto": {
+            center: [43.6532, -79.3832],
+            vehicles: [
+                { coords: [43.6426, -79.3871], popup: 'E-Bike near CN Tower' },
+                { coords: [43.6534, -79.3841], popup: 'E-Scooter at Nathan Phillips Square' },
+                { coords: [43.6653, -79.3977], popup: 'E-Bike near U of T' },
+                { coords: [43.6450, -79.3789], popup: 'E-Scooter near St. Lawrence Market' },
+                { coords: [43.6708, -79.3931], popup: 'E-Bike in Yorkville' },
+            ]
+        },
+        "Montreal": {
+            center: [45.5017, -73.5673],
+            vehicles: [
+                { coords: [45.5088, -73.554], popup: 'E-Bike in Old Montreal' },
+                { coords: [45.5033, -73.5702], popup: 'E-Scooter near Bell Centre' },
+                { coords: [45.5290, -73.5878], popup: 'E-Bike on Le Plateau' },
+                { coords: [45.4969, -73.5784], popup: 'E-Scooter near Concordia University' },
+                { coords: [45.5159, -73.5613], popup: 'E-Bike at Place des Arts' },
+            ]
+        },
+        "Calgary": {
+            center: [51.0447, -114.0719],
+            vehicles: [
+                { coords: [51.0376, -114.0620], popup: 'E-Scooter near Stampede Park' },
+                { coords: [51.0486, -114.0743], popup: 'E-Bike at Eau Claire Market' },
+                { coords: [51.0450, -114.0569], popup: 'E-Scooter in East Village' },
+                { coords: [51.0501, -114.0853], popup: 'E-Bike on 17th Ave' },
+                { coords: [51.0442, -114.0629], popup: 'E-Scooter near Calgary Tower' },
+            ]
+        },
+        "Vancouver": {
+            center: [49.2827, -123.1207],
+            vehicles: [
+                { coords: [49.2830, -123.1257], popup: 'E-Bike near Robson Square' },
+                { coords: [49.2785, -123.1229], popup: 'E-Scooter in Yaletown' },
+                { coords: [49.2882, -123.1150], popup: 'E-Bike in Gastown' },
+                { coords: [49.2753, -123.1157], popup: 'E-Scooter near Granville Island' },
+                { coords: [49.2890, -123.1345], popup: 'E-Bike near Stanley Park' },
+            ]
+        }
+    };
+
+    function updateMap(cityName) {
+        const city = cityData[cityName];
+        if (!city) return;
+
+        // Set map view
+        map.setView(city.center, 13);
+
+        // Clear existing markers
+        currentMarkers.forEach(marker => map.removeLayer(marker));
+        currentMarkers = [];
+
+        // Add new markers
+        city.vehicles.forEach((vehicle, index) => {
+            const marker = L.marker(vehicle.coords).addTo(map).bindPopup(vehicle.popup);
+            if (index === 0) { // Open the first popup
+                marker.openPopup();
+            }
+            currentMarkers.push(marker);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        map = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        const citySelector = document.getElementById('city-selector');
+        
+        // Initial map load
+        updateMap(citySelector.value);
+
+        // Add event listener for city changes
+        citySelector.addEventListener('change', (e) => {
+            updateMap(e.target.value);
+        });
+    });
+</script>
+
 </body>
 </html>
+
